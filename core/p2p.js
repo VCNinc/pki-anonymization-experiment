@@ -46,7 +46,8 @@ app.get('/gossip', (req, res) => {
   sws.on('open', () => {
     sws.send(JSON.stringify({
       id: uuid(),
-      message: req.query.m
+      message: req.query.m,
+      stem: 32
     }));
   });
   res.sendStatus(200);
