@@ -1,6 +1,8 @@
 const WebSocket = require('ws');
 var uuid = require('uuid-random');
 
+const App = require('./app');
+
 const node = (port) => {
   const me = 'ws://localhost:' + port;
   const peers = new Set();
@@ -8,6 +10,12 @@ const node = (port) => {
   const wss = new WebSocket.Server({ port: port, perMessageDeflate: false });
 
   const seen = new Set();
+
+  const app = new App(gossip, dandelion, report, me);
+
+  function report(data) {
+    sws.send(JSON.stringify({type: 're', data: data}));
+  }
 
   function dandelion(data) {
     const id = uuid();
@@ -38,7 +46,6 @@ const node = (port) => {
   wss.on('connection', (ws) => {
     ws.on('message', (message) => {
       data = JSON.parse(message);
-      console.log(message);
       if (data.stem > 0) {
         let all = Array.from(peers);
         let random = all[Math.floor(Math.random()*all.length)];
@@ -50,6 +57,7 @@ const node = (port) => {
           peers.forEach((peer) => {
             peer.send(message);
           });
+          app.deliver(data.message);
         }
       }
     })
