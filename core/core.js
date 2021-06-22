@@ -8,6 +8,7 @@ const nodes = new Set()
 const wc = new Set()
 const wss = new WebSocket.Server({ port: 8080, perMessageDeflate: false })
 let reports = []
+let inputs = []
 wss.on('connection', (ws) => {
   const obj = { ws: ws }
   ws.on('message', (message) => {
@@ -17,6 +18,7 @@ wss.on('connection', (ws) => {
       nodes.add(obj)
     } else if (message.type === 'wc') {
       wc.add(obj)
+      inputs.push(message.input)
     } else if (message.type === 're') {
       reports.push(message.data)
     }
@@ -28,6 +30,7 @@ wss.on('connection', (ws) => {
 })
 
 app.get('/spread', (req, res) => {
+  inputs = []
   const all = Array.from(nodes)
   const target = 32
   all.forEach((node) => {
@@ -39,7 +42,7 @@ app.get('/spread', (req, res) => {
       }
     }
     peers = Array.from(peers)
-    node.ws.send(JSON.stringify({ peers: peers, total: all.length, app: 'app' }))
+    node.ws.send(JSON.stringify({ peers: peers, total: all.length, app: (req.params.app ? req.params.app : 'app') }))
   })
   res.sendStatus(200)
 })
@@ -55,7 +58,16 @@ function aggregate (data) {
   }
 }
 
-app.get('/reports/get', (req, res) => {
+function collapse (data) {
+  const collapsed = {}
+  for (const res of data) {
+    if (!collapsed[res]) collapsed[res] = 0
+    collapsed[res]++
+  }
+  return collapsed
+}
+
+app.get('/reports', (req, res) => {
   const aggregates = { times: { total: [], events: {} }, results: {} }
   for (const event in reports[0].times.events) {
     aggregates.times.events[event] = []
@@ -77,7 +89,7 @@ app.get('/reports/get', (req, res) => {
     aggregates.times.events[event] = aggregate(aggregates.times.events[event])
   }
   for (const result in reports[0].results) {
-    aggregates.results[result] = aggregate(aggregates.results[result])
+    aggregates.results[result] = collapse(aggregates.results[result])
   }
   res.send({ aggregates: aggregates, reports: reports })
 })
@@ -91,7 +103,7 @@ app.get('/start', (req, res) => {
       id: uuid(),
       message: {
         route: 'start',
-        data: 'start'
+        data: inputs
       },
       stem: 32
     }))
@@ -100,10 +112,19 @@ app.get('/start', (req, res) => {
 })
 app.get('/status', (req, res) => {
   res.send({
-    c: nodes.size,
-    wc: wc.size,
-    r: reports.length
+    connections: nodes.size,
+    networks: wc.size,
+    reports: reports.length
   })
+})
+app.get('/reset', (req, res) => {
+  reports = []
+  inputs = []
+  const all = Array.from(nodes)
+  all.forEach((node) => {
+    node.ws.send(JSON.stringify({ type: 'exit' }))
+  })
+  res.sendStatus(200)
 })
 app.listen(3000)
 

@@ -1,4 +1,5 @@
 const { performance } = require('perf_hooks')
+const { createHash } = require('crypto')
 
 class Application {
   constructor (gossip, dandelion, report, id) {
@@ -11,12 +12,18 @@ class Application {
     this.results = {}
     this.route('start', async (msg) => {
       this.times.start = performance.now()
+      this.inputs = msg
       await this.run()
       this.times.end = performance.now()
       this.finish()
     })
     this.collect = {}
     this.receiver = {}
+  }
+
+  async input () {
+    const input = Math.random()
+    return input
   }
 
   async step (event, func, prefix) {
@@ -30,7 +37,13 @@ class Application {
   }
 
   async record (result, data, prefix = 'compute') {
-    this.results[prefix + '::' + result] = data
+    let value = data
+    if (Array.isArray(data)) {
+      data.sort()
+      const str = JSON.stringify(data)
+      value = '0x' + createHash('sha256').update(str, 'utf8').digest('hex')
+    }
+    this.results[prefix + '::' + result] = value
   }
 
   deliver (message) {
@@ -101,8 +114,9 @@ class Application {
       console.log('app ending!')
     })
 
-    await this.record('hellos', hello.length)
-    await this.record('hiddens', hidden.length)
+    await this.record('hellos', hello)
+    await this.record('hiddens', hidden)
+    await this.record('inputs', this.inputs)
   }
 }
 

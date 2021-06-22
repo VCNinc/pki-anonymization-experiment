@@ -1,7 +1,8 @@
 const WebSocket = require('ws')
 const uuid = require('uuid-random')
 
-const App = require('./app')
+const Application = require('./Application')
+const Reconstitution = require('./Reconstitution')
 
 const node = (port) => {
   const me = 'ws://localhost:' + port
@@ -69,8 +70,10 @@ const node = (port) => {
   })
   sws.on('message', (message) => {
     const data = JSON.parse(message)
+    if (message.type === 'exit') return process.exit()
     const neighbors = data.peers
-    if (data.app === 'app') app = new App(gossip, dandelion, report, me)
+    if (data.app === 'app') app = new Application(gossip, dandelion, report, me)
+    if (data.app === 'reconstitution') app = new Reconstitution(gossip, dandelion, report, me)
     app.total = data.total
     const promises = []
     neighbors.forEach((neighbor) => {
@@ -82,8 +85,9 @@ const node = (port) => {
         })
       }))
     })
-    Promise.all(promises).then(() => {
-      sws.send(JSON.stringify({ type: 'wc', data: me }))
+    Promise.all(promises).then(async () => {
+      const input = await app.input()
+      sws.send(JSON.stringify({ type: 'wc', data: me, input: input }))
     })
   })
 }
