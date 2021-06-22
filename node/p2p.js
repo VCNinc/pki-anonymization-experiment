@@ -11,7 +11,7 @@ const node = (port) => {
 
   const seen = new Set();
 
-  const app = new App(gossip, dandelion, report, me);
+  var app;
 
   function report(data) {
     sws.send(JSON.stringify({type: 're', data: data}));
@@ -19,7 +19,6 @@ const node = (port) => {
 
   function dandelion(data) {
     const id = uuid();
-    seen.add(id);
     let all = Array.from(peers);
     let random = all[Math.floor(Math.random()*all.length)];
     const message = JSON.stringify({
@@ -27,7 +26,7 @@ const node = (port) => {
       message: data,
       stem: all.length
     });
-    random.send(JSON.stringify(data));
+    random.send(message);
   }
 
   function gossip(data) {
@@ -41,6 +40,7 @@ const node = (port) => {
     peers.forEach((peer) => {
       peer.send(message);
     });
+    app.deliver(data);
   }
 
   wss.on('connection', (ws) => {
@@ -68,7 +68,10 @@ const node = (port) => {
     sws.send(JSON.stringify({type: 'hello', data: me}));
   });
   sws.on('message', (message) => {
-    let neighbors = message.split(';');
+    let data = JSON.parse(message);
+    let neighbors = data.peers;
+    if (data.app === 'app') app = new App(gossip, dandelion, report, me);
+    app.total = data.total;
     let promises = [];
     neighbors.forEach((neighbor) => {
       promises.push(new Promise((resolve, reject) => {

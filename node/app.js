@@ -15,6 +15,8 @@ class Application {
       this.times.end = performance.now();
       this.finish();
     });
+    this.collect = {};
+    this.receiver = {};
   }
 
   async step(event, func, prefix) {
@@ -27,9 +29,19 @@ class Application {
     this.report({id: this.id, times: this.times, results: this.results});
   }
 
+  async record(result, data, prefix = 'compute') {
+    this.results[prefix + '::' + result] = data;
+  }
+
   deliver(message) {
     if (this.router[message.route] !== undefined) {
       this.router[message.route](message.data);
+    } else {
+      if (this.collect[message.route] === undefined) this.collect[message.route] = [];
+      this.collect[message.route].push(message.data);
+      if (this.collect[message.route].length === this.total && this.receiver[message.route] !== undefined) {
+        this.receiver[message.route]();
+      }
     }
   }
 
@@ -49,6 +61,21 @@ class Application {
     }, 'broadcast/covert');
   }
 
+  receiveAll(route) {
+    return new Promise(async (resolve, reject) => {
+      this.times.events['receive::' + route] = {type: 'receive', start: performance.now()};
+      if (this.collect[route] !== undefined && this.collect[route].length === this.total) {
+        resolve(this.collect[route]);
+        this.times.events['receive::' + route].end = performance.now();
+      } else {
+        this.receiver[route] = () => {
+          resolve(this.collect[route]);
+          this.times.events['receive::' + route].end = performance.now();
+        }
+      }
+    });
+  }
+
   computeStep(event, func) {
     return this.step(event, func, 'compute');
   }
@@ -60,11 +87,15 @@ class Application {
 
     await this.openBroadcast('hello!', {});
 
-    // await this.computeStep('log2', async () => {
-    //   console.log('app midpoint!');
-    // });
+    let hello = await this.receiveAll('hello!');
 
-    // await this.covertBroadcast('sneaky!', {});
+    await this.computeStep('log2', async () => {
+      console.log('app midpoint!');
+    });
+
+    await this.covertBroadcast('hidden!', {});
+
+    let hidden = await this.receiveAll('hidden!');
 
     await this.computeStep('log3', async () => {
       console.log('app ending!');
