@@ -41,7 +41,12 @@ class Application {
     if (Array.isArray(data)) {
       data.sort()
       const str = JSON.stringify(data)
-      value = '0x' + createHash('sha256').update(str, 'utf8').digest('hex')
+      value = 'n=' + data.length + ',hash=' + createHash('sha256').update(str, 'utf8').digest('hex')
+    } else if (typeof data === 'object') {
+      value = Object.entries(data)
+      value.sort()
+      const str = JSON.stringify(value)
+      value = 'n=' + value.length + ',hash=' + createHash('sha256').update(str, 'utf8').digest('hex')
     }
     this.results[prefix + '::' + result] = value
   }
@@ -64,6 +69,7 @@ class Application {
 
   async openBroadcast (route, data) {
     await this.step(route, async () => {
+      data.from = this.id
       this.gossip({ route: route, data: data })
     }, 'broadcast/open')
   }
@@ -116,7 +122,7 @@ class Application {
 
     await this.record('hellos', hello)
     await this.record('hiddens', hidden)
-    await this.record('inputs', this.inputs)
+    await this.record('inputs', JSON.stringify(this.inputs))
   }
 }
 

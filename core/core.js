@@ -8,7 +8,8 @@ const nodes = new Set()
 const wc = new Set()
 const wss = new WebSocket.Server({ port: 8080, perMessageDeflate: false })
 let reports = []
-let inputs = []
+let inputs = {}
+let random
 wss.on('connection', (ws) => {
   const obj = { ws: ws }
   ws.on('message', (message) => {
@@ -31,18 +32,19 @@ wss.on('connection', (ws) => {
 
 app.get('/spread', (req, res) => {
   inputs = []
-  const all = Array.from(nodes)
-  const target = 32
+  const target = req.query.target
+  const total = req.query.total
+  const all = Array.from(nodes).slice(0, total)
   all.forEach((node) => {
     let peers = new Set()
     while (peers.size < target) {
-      const random = all[Math.floor(Math.random() * all.length)].url
+      random = all[Math.floor(Math.random() * all.length)].url
       if (random !== node.url) {
         peers.add(random)
       }
     }
     peers = Array.from(peers)
-    node.ws.send(JSON.stringify({ peers: peers, total: all.length, app: (req.params.app ? req.params.app : 'app') }))
+    node.ws.send(JSON.stringify({ peers: peers, total: all.length, app: req.query.app }))
   })
   res.sendStatus(200)
 })
@@ -94,9 +96,6 @@ app.get('/reports', (req, res) => {
   res.send({ aggregates: aggregates, reports: reports })
 })
 app.get('/start', (req, res) => {
-  reports = []
-  const all = Array.from(nodes)
-  const random = all[Math.floor(Math.random() * all.length)].url
   const sws = new WebSocket(random)
   sws.on('open', () => {
     sws.send(JSON.stringify({
@@ -119,7 +118,7 @@ app.get('/status', (req, res) => {
 })
 app.get('/reset', (req, res) => {
   reports = []
-  inputs = []
+  inputs = {}
   const all = Array.from(nodes)
   all.forEach((node) => {
     node.ws.send(JSON.stringify({ type: 'exit' }))

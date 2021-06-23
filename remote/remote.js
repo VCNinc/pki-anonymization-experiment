@@ -1,4 +1,5 @@
 const axios = require('axios')
+const fs = require('fs')
 
 const core = 'http://localhost:3000/'
 
@@ -29,14 +30,14 @@ function waitFor (property, value) {
   })
 }
 
-function spread () {
+function spread (name, total, target = 32) {
   console.log('building network...')
-  return axios.get(core + 'spread')
+  return axios.get(core + 'spread?total=' + total + '&target=' + target + '&app=' + name)
 }
 
-function start (name) {
-  console.log('starting execution: ' + name)
-  return axios.get(core + 'start?app=' + name)
+function start () {
+  console.log('starting execution')
+  return axios.get(core + 'start')
 }
 
 function reports () {
@@ -55,24 +56,28 @@ function reset () {
   return axios.get(core + 'reset')
 }
 
-async function run (name, total) {
+async function run (name, total, target = 32) {
   console.log('NOW RUNNING ' + name + ' WITH ' + total + ' NODES')
   await connect()
   await reset()
   await sleep(1000)
   await waitFor('connections', total)
   await sleep(1000)
-  await spread()
+  await spread(name, total, target)
   await sleep(1000)
   await waitFor('networks', total)
   await sleep(1000)
-  await start(name)
-  await sleep(30000)
+  await start()
+  await sleep(1000)
   await waitFor('reports', total)
   await sleep(1000)
-  return (await reports()).data
+  const data = (await reports()).data
+  fs.writeFileSync('./results/' + name + '-' + total + '-' + Date.now() + '.json', JSON.stringify(data))
+  return data
 }
 
 (async () => {
-  console.log((await run('app', 100)).aggregates)
+  for (let i = 6; i <= 10; i++) {
+    await run('reconstitution', 2 ** i)
+  }
 })()

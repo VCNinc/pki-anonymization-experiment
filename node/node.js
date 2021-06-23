@@ -70,7 +70,7 @@ const node = (port) => {
   })
   sws.on('message', (message) => {
     const data = JSON.parse(message)
-    if (message.type === 'exit') return process.exit()
+    if (data.type === 'exit') return process.exit()
     const neighbors = data.peers
     if (data.app === 'app') app = new Application(gossip, dandelion, report, me)
     if (data.app === 'reconstitution') app = new Reconstitution(gossip, dandelion, report, me)
@@ -92,6 +92,6 @@ const node = (port) => {
   })
 }
 
-for (let i = 0; i < 100; i++) {
-  node(4000 + i)
+for (let i = 0; i < 1024; i++) {
+  node(15000 + i)
 }
