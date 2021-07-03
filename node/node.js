@@ -3,6 +3,7 @@ const uuid = require('uuid-random')
 
 const Application = require('./Application')
 const Reconstitution = require('./Reconstitution')
+const SingleValueConsensus = require('./SingleValueConsensus')
 
 const node = (port) => {
   const me = 'ws://localhost:' + port
@@ -74,6 +75,7 @@ const node = (port) => {
     const neighbors = data.peers
     if (data.app === 'app') app = new Application(gossip, dandelion, report, me)
     if (data.app === 'reconstitution') app = new Reconstitution(gossip, dandelion, report, me)
+    if (data.app === 'single-value-consensus') app = new SingleValueConsensus(gossip, dandelion, report, me)
     app.total = data.total
     const promises = []
     neighbors.forEach((neighbor) => {
@@ -92,6 +94,6 @@ const node = (port) => {
   })
 }
 
-for (let i = 0; i < 1024; i++) {
+for (let i = 0; i < 256; i++) {
   node(15000 + i)
 }

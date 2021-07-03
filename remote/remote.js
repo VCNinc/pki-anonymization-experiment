@@ -57,6 +57,7 @@ function reset () {
 }
 
 async function run (name, total, target = 32) {
+  target = Math.min(target, total - 1)
   console.log('NOW RUNNING ' + name + ' WITH ' + total + ' NODES')
   await connect()
   await reset()
@@ -73,11 +74,10 @@ async function run (name, total, target = 32) {
   await sleep(1000)
   const data = (await reports()).data
   fs.writeFileSync('./results/' + name + '-' + total + '-' + Date.now() + '.json', JSON.stringify(data))
+  console.log(data.aggregates)
   return data
 }
 
 (async () => {
-  for (let i = 6; i <= 10; i++) {
-    await run('reconstitution', 2 ** i)
-  }
+  await run('single-value-consensus', 8)
 })()

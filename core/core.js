@@ -104,7 +104,7 @@ app.get('/start', (req, res) => {
         route: 'start',
         data: inputs
       },
-      stem: 32
+      stem: 0
     }))
   })
   res.sendStatus(200)
