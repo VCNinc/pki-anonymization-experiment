@@ -97,7 +97,7 @@ class Reconstitution extends Application {
     await this.computeStep('A8-output-final', async () => {
       console.log(skOUT)
       await this.record('PKIOut', PKIOut)
-      await this.record('PKICorrect', PKIOut[this.id] === ascii)
+      await this.assert('PKICorrect', PKIOut[this.id] === ascii)
     })
   }
 }

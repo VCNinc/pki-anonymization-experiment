@@ -54,9 +54,9 @@ class FastBenchmark extends Application {
     console.log('2/4')
     await testIdentical('medium', '12345678'.repeat(128))
     console.log('3/4')
-    await testRandom('small', Math.random().toString())
+    await testRandom('small', Math.random().toString(36).substring(8))
     console.log('4/4')
-    await testRandom('medium', Math.random().toString(36).substring(7).repeat(146))
+    await testRandom('medium', Math.random().toString(36).substring(8).repeat(128))
   }
 }
 

@@ -56,11 +56,11 @@ class Benchmark extends Application {
     console.log('3/6')
     await testIdentical('large', '12345678'.repeat(128 * 128))
     console.log('4/6')
-    await testRandom('small', Math.random().toString())
+    await testRandom('small', Math.random().toString(36).substring(8))
     console.log('5/6')
-    await testRandom('medium', Math.random().toString().repeat(128))
+    await testRandom('medium', Math.random().toString(36).substring(8).repeat(128))
     console.log('6/6')
-    await testRandom('large', Math.random().toString().repeat(128 * 128))
+    await testRandom('large', Math.random().toString(36).substring(8).repeat(128*128))
   }
 }
 
