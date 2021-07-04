@@ -2,11 +2,13 @@ const { performance } = require('perf_hooks')
 const { createHash } = require('crypto')
 
 class Application {
-  constructor (gossip, dandelion, report, id) {
+  constructor (gossip, dandelion, report, id, database, threephase) {
     this.gossip = gossip
     this.dandelion = dandelion
     this.report = report
     this.id = id
+    this.database = database
+    this.threephase = threephase
     this.router = []
     this.times = { events: {} }
     this.results = {}
@@ -19,6 +21,7 @@ class Application {
     })
     this.collect = {}
     this.receiver = {}
+    this.perfect = true
   }
 
   async input () {
@@ -36,6 +39,12 @@ class Application {
     this.report({ id: this.id, times: this.times, results: this.results })
   }
 
+  async assert (result, value) {
+    this.perfect = this.perfect && value
+    this.results['assert::perfect'] = (this.perfect ? 'true' : 'false')
+    this.results['assert::' + result] = (value ? 'true' : 'false')
+  }
+
   async record (result, data, prefix = 'compute') {
     let value = data
     if (Array.isArray(data)) {
@@ -49,6 +58,22 @@ class Application {
       value = 'n=' + value.length + ',hash=' + createHash('sha256').update(str, 'utf8').digest('hex')
     }
     this.results[prefix + '::' + result] = value
+  }
+
+  udeliver (id, hash, route) {
+    if (this.collect[route] === undefined) this.collect[route] = { ids: new Set(), hashes: new Set() }
+
+    this.collect[route].ids.add(id)
+    this.collect[route].hashes.add(hash)
+
+    if (this.collect[route].ids.size === this.total && this.receiver[route] !== undefined) {
+      const collection = []
+      this.collect[route].hashes.forEach((hash) => {
+        collection.push(this.database.get(hash).data)
+      })
+      this.collect[route] = collection
+      this.receiver[route]()
+    }
   }
 
   deliver (message) {
@@ -67,9 +92,15 @@ class Application {
     this.router[route] = func
   }
 
+  async threePhaseBroadcast (route, data) {
+    await this.step(route, async () => {
+      this.threephase({ route: route, data: data })
+    }, 'broadcast/three-phase')
+  }
+
   async openBroadcast (route, data) {
     await this.step(route, async () => {
-      data.from = this.id
+      // data.from = this.id
       this.gossip({ route: route, data: data })
     }, 'broadcast/open')
   }
@@ -104,7 +135,7 @@ class Application {
       console.log('app starting!')
     })
 
-    await this.openBroadcast('hello!', {})
+    await this.openBroadcast('hello!', { hello: 'world' })
 
     const hello = await this.receiveAll('hello!')
 
@@ -112,17 +143,26 @@ class Application {
       console.log('app midpoint!')
     })
 
-    await this.covertBroadcast('hidden!', {})
+    await this.covertBroadcast('hidden!', { hello: 'hidden' })
 
     const hidden = await this.receiveAll('hidden!')
 
     await this.computeStep('log3', async () => {
+      console.log('app midpoint 2!')
+    })
+
+    await this.threePhaseBroadcast('threephase!', { hello: 'threephase' })
+
+    const threephase = await this.receiveAll('threephase!')
+
+    await this.computeStep('log4', async () => {
       console.log('app ending!')
     })
 
     await this.record('hellos', hello)
     await this.record('hiddens', hidden)
-    await this.record('inputs', JSON.stringify(this.inputs))
+    await this.record('threephases', threephase)
+    await this.record('inputs', this.inputs)
   }
 }
 

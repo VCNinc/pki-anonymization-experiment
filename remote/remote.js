@@ -56,7 +56,7 @@ function reset () {
   return axios.get(core + 'reset')
 }
 
-async function run (name, total, target = 32) {
+async function run (name, total, target = 32, save = false) {
   target = Math.min(target, total - 1)
   console.log('NOW RUNNING ' + name + ' WITH ' + total + ' NODES')
   await connect()
@@ -73,11 +73,11 @@ async function run (name, total, target = 32) {
   await waitFor('reports', total)
   await sleep(1000)
   const data = (await reports()).data
-  fs.writeFileSync('./results/' + name + '-' + total + '-' + Date.now() + '.json', JSON.stringify(data))
+  if (save) fs.writeFileSync('./results/' + name + '-' + total + '-' + Date.now() + '.json', JSON.stringify(data))
   console.log(data.aggregates)
   return data
 }
 
 (async () => {
-  await run('single-value-consensus', 8)
+  await run('benchmark', 8)
 })()
