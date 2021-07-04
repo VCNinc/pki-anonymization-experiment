@@ -79,12 +79,9 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('benchmark', 2, 32, true)
-  await run('benchmark', 4, 32, true)
-  await run('benchmark', 8, 32, true)
-  await run('benchmark', 16, 32, true)
-  await run('benchmark', 32, 32, true)
-  await run('benchmark', 64, 32, true)
-  await run('benchmark', 128, 32, true)
-  await run('benchmark', 256, 32, true)
+  await run('fast-benchmark', 64, 32, true)
+  await run('fast-benchmark', 128, 32, true)
+  await run('fast-benchmark', 256, 32, true)
+  // await run('benchmark', 128, 32, true)
+  // await run('benchmark', 256, 32, true)
 })()
