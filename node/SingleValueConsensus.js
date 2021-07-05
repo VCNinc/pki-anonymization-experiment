@@ -37,9 +37,8 @@ class SingleValueConsensus extends Application {
     messages.sort((a, b) => (a.value > b.value) ? 1 : -1)
 
     // B4 - broadcast received messages
-    await this.openBroadcast('B4-received-messages', { set: 'hello' })
+    await this.threePhaseBroadcast('B4-received-messages', { set: messages })
     const sets = await this.receiveAll('B4-received-messages')
-    console.log(sets)
 
     // B5 - compute set union
     // let union
@@ -49,6 +48,7 @@ class SingleValueConsensus extends Application {
     // })
 
     await this.record('messages', messages)
+    await this.record('sets', sets)
     // await this.record('sets', usets)
 
     // // A1 - compute output key pair
