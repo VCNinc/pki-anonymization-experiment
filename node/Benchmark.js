@@ -60,7 +60,7 @@ class Benchmark extends Application {
     console.log('5/6')
     await testRandom('medium', Math.random().toString(36).substring(8).repeat(128))
     console.log('6/6')
-    await testRandom('large', Math.random().toString(36).substring(8).repeat(128*128))
+    await testRandom('large', Math.random().toString(36).substring(8).repeat(128 * 128))
   }
 }
 
