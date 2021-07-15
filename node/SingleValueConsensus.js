@@ -12,13 +12,14 @@ class SingleValueConsensus extends Application {
 
   async run () {
     const input = uuid()
+    const pki = this.inputs
 
     // B1 - generate rs issue, tag
     let issue = crypto.createHash('sha256')
     await this.computeStep('B1-generate-rs-issue-tag', async () => {
       issue.update('SingleValueConsensus')
-      this.inputs.sort()
-      this.inputs.forEach((input) => {
+      pki.sort()
+      pki.forEach((input) => {
         issue.update(input)
       })
     })
@@ -27,7 +28,7 @@ class SingleValueConsensus extends Application {
     // B2 - generate rs
     let rs
     await this.computeStep('B2-generate-rs', async () => {
-      const sig = trs.generate_signature(input, this.inputs, issue, this.kp.private)
+      const sig = trs.generate_signature(input, pki, issue, this.kp.private)
       rs = trs.signature_to_ascii(sig)
     })
 
@@ -41,14 +42,70 @@ class SingleValueConsensus extends Application {
     const sets = await this.receiveAll('B4-received-messages')
 
     // B5 - compute set union
-    // let union
-    // await this.computeStep('B5-compute-set-union', async () => {
-    //   const usets = Array.from(new Set(sets))
-    //
-    // })
+    let union
+    await this.computeStep('B5-compute-set-union', async () => {
+      union = new Set()
+      sets.forEach((set) => {
+        set.set.forEach((item) => {
+          union.add(item)
+        })
+      })
+      union = Array.from(union)
+    })
+
+    // B6 - verify all signatures
+    let verified
+    await this.computeStep('B6-verify-all-signatures', async () => {
+      // union.forEach((item) => {
+      //   if (typeof item.rs === "string") item.rs = trs.ascii_to_signature(item.rs);
+      // })
+      verified = union.filter(item => {
+        if (item.issue !== issue) return false
+        const sig = trs.ascii_to_signature(item.rs)
+        return trs.verify_signature(item.value, pki, issue, sig)
+      })
+    })
+
+    function getRemove(unlinked, total) {
+      const remove = new Set()
+      if (unlinked.size - remove.size <= total) return remove;
+      for (let i = 0; i < verified.length - 1; i++) {
+        for (let j = i + 1; j < verified.length; j++) {
+          const s1 = verified[i]; const s2 = verified[j]
+          const sig1 = trs.ascii_to_signature(s1.rs)
+          const sig2 = trs.ascii_to_signature(s2.rs)
+          if (trs.trace_signature(s1.value, sig1, s2.value, sig2, pki, issue) !== 'indep') {
+            remove.add(s1)
+            remove.add(s2)
+            if (unlinked.size - remove.size <= total) return remove;
+          }
+        }
+      }
+      return remove;
+    }
+
+    // B7 - check all links
+    let unlinked
+    await this.computeStep('B7-check-all-links', async () => {
+      unlinked = new Set(verified)
+      const remove = getRemove(unlinked, this.total)
+      remove.forEach((el) => {
+        unlinked.delete(remove)
+      })
+    })
+
+    // B8 - output values
+    await this.computeStep('B8-output-values', async () => {
+      const values = Array.from(unlinked).map(i => i.value)
+      await this.assert('valid', values.includes(input))
+      await this.record('values', values)
+    })
 
     await this.record('messages', messages)
     await this.record('sets', sets)
+    await this.record('union', union)
+    await this.record('verified', verified)
+    await this.record('unlinked', unlinked)
     // await this.record('sets', usets)
 
     // // A1 - compute output key pair
