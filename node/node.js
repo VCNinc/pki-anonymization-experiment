@@ -8,8 +8,8 @@ const SingleValueConsensus = require('./SingleValueConsensus')
 const Benchmark = require('./Benchmark')
 const FastBenchmark = require('./FastBenchmark')
 
-const node = (port) => {
-  const me = 'ws://localhost:' + port
+const node = (port, myip = 'localhost', remotelocation = 'ws://172.31.18.37:8080') => {
+  const me = 'ws://' + myip + ':' + port
   const peers = new Set()
   const database = new Map()
 
@@ -118,7 +118,7 @@ const node = (port) => {
     })
   })
 
-  const sws = new WebSocket('ws://localhost:8080')
+  const sws = new WebSocket(remotelocation)
   sws.on('open', () => {
     sws.send(JSON.stringify({ type: 'hello', data: me }))
   })
