@@ -158,6 +158,4 @@ const node = (port) => {
   })
 }
 
-for (let i = 0; i < 256; i++) {
-  node(15000 + i)
-}
+module.exports = node
