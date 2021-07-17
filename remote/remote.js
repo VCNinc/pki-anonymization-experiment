@@ -79,5 +79,5 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('single-value-consensus', 32, 32, true)
+  await run('single-value-consensus', 256, 32, true)
 })()
