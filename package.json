@@ -6,6 +6,7 @@
   "scripts": {
     "node": "pm2 start ./node/node.js --restart-delay=3000 -i 1",
     "core": "pm2 start ./core/core.js --restart-delay=1000 -i 1",
+    "amazon": "pm2 start ./amazon.js --restart-delay=1000 -i 1",
     "remote": "node ./remote/remote.js",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all",
