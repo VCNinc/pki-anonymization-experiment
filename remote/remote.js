@@ -80,6 +80,17 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('single-chat-room-pkia', 1024, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
+  await run('single-chat-room-trs', 64, 32, true)
   // await run('single-chat-room-trs', 512, 32, true)
 })()

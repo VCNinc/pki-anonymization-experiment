@@ -20,10 +20,14 @@ class SingleChatRoomTRS extends Application {
       }
     })
 
-    let cleartextMessage
+    let cleartextMessage = ''
     await this.computeStep('sign', async () => {
-      const sig = trs.generate_signature(this.message, pki, issue, this.privateKey)
-      cleartextMessage = trs.signature_to_ascii(sig)
+      try {
+        const sig = trs.generate_signature(this.message, pki, issue, this.privateKey)
+        cleartextMessage = trs.signature_to_ascii(sig)
+      } catch (e) {
+        console.log(e)
+      }
     })
 
     await this.covertBroadcast('chat', { msg: this.message, sig: cleartextMessage })
@@ -31,8 +35,12 @@ class SingleChatRoomTRS extends Application {
 
     await this.computeStep('verify', async () => {
       for (const chat of chats) {
-        const sig = trs.ascii_to_signature(chat.sig)
-        trs.verify_signature(chat.msg, pki, issue, sig)
+        try {
+          const sig = trs.ascii_to_signature(chat.sig)
+          trs.verify_signature(chat.msg, pki, issue, sig)
+        } catch (e) {
+          console.log(e)
+        }
       }
     })
   }
