@@ -12,6 +12,137 @@ def get_data_from_directory(directory):
     return {int(name.split('-')[-2]): json.load(open(directory + "/" + name, "r")) for name in files}
 
 
+all_node_counts = np.array([2**i for i in range(1, 13)])
+
+
+def trendline_plot(directory):
+
+    data = get_data_from_directory(directory)
+
+    node_counts = np.array(sorted([i for i in data]))
+
+    avg_times = np.array([data[i]["aggregates"]["times"]["total"]["mean"] for i in node_counts])
+
+    plt.scatter(node_counts, avg_times)
+
+    plt.xlabel('# of Nodes')
+    plt.ylabel('Avg time to completion (ms)')
+
+    # plt.xlim([2, 4096])
+
+    plt.xscale('log')
+    plt.yscale('log')
+
+    print("fitting")
+
+    z = np.polyfit(np.log(node_counts), np.log(avg_times), 1)
+
+    print(z)
+
+    p = np.poly1d(z)
+
+    print(node_counts, all_node_counts)
+
+    plt.plot(all_node_counts, np.exp(p(np.log(all_node_counts))), "r--", label="Power Law Fit")
+
+    z = np.polyfit(node_counts, avg_times, 2)
+
+    print(z)
+
+    p = np.poly1d(z)
+    plt.plot(all_node_counts, p(all_node_counts), "g--", label="Quadratic Fit")
+
+    plt.legend()
+
+    os.makedirs(f"./img/{directory}", exist_ok=True)
+    plt.savefig(f"img/{directory}/multitrendline.png")
+
+
+# trendline_plot("local/reconstitution")
+# trendline_plot("local/single-value-consensus")
+# trendline_plot("benchmarks/networks")
+# trendline_plot("benchmarks/svc-1phase-vs-3phase-comparison/svc-1phase")
+# trendline_plot("benchmarks/svc-1phase-vs-3phase-comparison/svc-3phase")
+# trendline_plot("benchmarks/svc-link-optimize-comparison/svc-optimized")
+# trendline_plot("benchmarks/svc-link-optimize-comparison/svc-unoptimized")
+# trendline_plot("remote/single-value-consensus")
+trendline_plot("final/single-value-consensus")
+
+
+quit()
+
+
+def generate_stacked_bar_plot(directory):
+
+    data = get_data_from_directory(directory)
+
+    task_names = data[2]["reports"][0]["times"]["events"]
+
+    list_of_values1 = []
+
+    for task in task_names:
+        values = []
+
+        for size in sorted(data):
+
+            times = []
+
+            for report in data[size]["reports"]:
+
+                v = report["times"]["events"]
+
+                times.append(v[task]["end"]-v[task]["start"])
+
+            avg = sum(times)/len(times)
+            values.append(avg)
+        list_of_values1.append(values)
+
+    # Plot
+    print("Generating Plot")
+
+    labels = [str(d) for d in sorted(data)]
+
+    print(labels)
+
+    width = 0.35
+
+    fig, ax = plt.subplots()
+
+    print(list_of_values1)
+
+    # ax.bar(labels, [1 for l in labels], width, label="foo")
+
+    # ax.bar(labels, [1 for l in labels], width, label="bar")
+
+    # bottom = [0 for l in labels]
+
+    for values1, task in zip(list_of_values1, task_names):
+        print(task, values1, "\n")
+
+        ax.bar(labels, values1, width, label=task)
+
+        # for l in range(len(labels)):
+        #     bottom[l] += values1[l]
+
+    ax.set_ylabel('Avg time')
+    # ax.set(yscale="log")
+
+    ax.set_title('Bar Chart of TImes for Different Phases')
+    ax.legend()
+    # plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+    print("saving")
+
+    os.makedirs(f"./img/{directory}", exist_ok=True)
+
+    plt.savefig(f"img/{directory}/stackedbar.png")
+
+
+# generate_stacked_bar_plot("final/single-value-consensus")
+
+quit()
+
+
 def generate_grouped_svc_1_vs_3_plot():
 
     data_svc1 = get_data_from_directory("svc-1phase")
@@ -94,7 +225,7 @@ def generate_grouped_svc_1_vs_3_plot():
     plt.savefig(f"SVC-1-vs-3-bar.png")
 
 
-generate_grouped_svc_1_vs_3_plot()
+# generate_grouped_svc_1_vs_3_plot()
 
 
 def generate_benchmark_plot():
@@ -164,8 +295,8 @@ def generate_benchmark_plot():
     plt.savefig("benchmarkplots.png")
 
 
-generate_benchmark_plot()
-quit()
+# generate_benchmark_plot()
+# quit()
 
 
 def make_boxplots_plots():
