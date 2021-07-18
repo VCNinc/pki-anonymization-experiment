@@ -1,8 +1,8 @@
 const axios = require('axios')
 const fs = require('fs')
 
-// const core = 'http://18.218.248.166:3000/'  // remote
-const core = 'http://localhost:3000/' // local
+const core = 'http://18.218.248.166:3000/'  // remote
+// const core = 'http://localhost:3000/' // local
 
 function connect () {
   console.log('waiting for server...')
@@ -80,7 +80,7 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('single-chat-room-pkia', 64, 32, true)
-  await run('single-chat-room-pkia', 128, 32, true)
-  await run('single-chat-room-pkia', 256, 32, true)
+  await run('single-chat-room-trs', 2, 32, true)
+  await run('single-chat-room-trs', 4, 32, true)
+  await run('single-chat-room-trs', 8, 32, true)
 })()

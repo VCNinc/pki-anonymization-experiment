@@ -23,14 +23,14 @@ class SingleChatRoomPKIA extends Application {
   }
 
   async run () {
-    var pki = [];
+    const pki = []
     await this.computeStep('construct', async () => {
-      for (let input of this.inputs) {
+      for (const input of this.inputs) {
         pki[input.xid] = await openpgp.readKey({ armoredKey: input.pk })
       }
     })
 
-    var cleartextMessage;
+    let cleartextMessage
     await this.computeStep('sign', async () => {
       cleartextMessage = await openpgp.sign({
         message: this.unsignedMessage,
@@ -42,7 +42,7 @@ class SingleChatRoomPKIA extends Application {
     const chats = await this.receiveAll('chat')
 
     await this.computeStep('verify', async () => {
-      for (let chat of chats) {
+      for (const chat of chats) {
         const signedMessage = await openpgp.readCleartextMessage({
           cleartextMessage: chat.msg
         })

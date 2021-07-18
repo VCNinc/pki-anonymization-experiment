@@ -8,6 +8,7 @@ const SingleValueConsensus = require('./SingleValueConsensus')
 const Benchmark = require('./Benchmark')
 const FastBenchmark = require('./FastBenchmark')
 const SingleChatRoomPKIA = require('./SingleChatRoomPKIA')
+const SingleChatRoomTRS = require('./SingleChatRoomTRS')
 
 const node = (port, myip = 'localhost', remotelocation = 'ws://172.31.18.37:8080') => {
   const me = 'ws://' + myip + ':' + port
@@ -133,6 +134,7 @@ const node = (port, myip = 'localhost', remotelocation = 'ws://172.31.18.37:8080
     if (data.app === 'single-value-consensus') app = new SingleValueConsensus(gossip, dandelion, report, me, database, threephase)
     if (data.app === 'fast-benchmark') app = new FastBenchmark(gossip, dandelion, report, me, database, threephase)
     if (data.app === 'single-chat-room-pkia') app = new SingleChatRoomPKIA(gossip, dandelion, report, me, database, threephase)
+    if (data.app === 'single-chat-room-trs') app = new SingleChatRoomTRS(gossip, dandelion, report, me, database, threephase)
 
     app.total = data.total
     const promises = []
