@@ -1,7 +1,7 @@
 const axios = require('axios')
 const fs = require('fs')
 
-const core = 'http://3.135.239.252:3000/'  // remote
+const core = 'http://13.58.18.69:3000/'  // remote
 // const core = 'http://localhost:3000/' // local
 
 function connect () {
@@ -80,17 +80,6 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  await run('single-chat-room-trs', 64, 32, true)
-  // await run('single-chat-room-trs', 512, 32, true)
+  await run('single-value-consensus', 256, 32, true)
+  await run('single-value-consensus', 512, 32, true)
 })()
