@@ -66,9 +66,9 @@ class SingleValueConsensus extends Application {
       })
     })
 
-    function getRemove(unlinked, total) {
+    function getRemove (unlinked, total) {
       const remove = new Set()
-      if (unlinked.size - remove.size <= total) return remove;
+      if (unlinked.size - remove.size <= total) return remove
       for (let i = 0; i < verified.length - 1; i++) {
         for (let j = i + 1; j < verified.length; j++) {
           const s1 = verified[i]; const s2 = verified[j]
@@ -77,11 +77,11 @@ class SingleValueConsensus extends Application {
           if (trs.trace_signature(s1.value, sig1, s2.value, sig2, pki, issue) !== 'indep') {
             remove.add(s1)
             remove.add(s2)
-            if (unlinked.size - remove.size <= total) return remove;
+            if (unlinked.size - remove.size <= total) return remove
           }
         }
       }
-      return remove;
+      return remove
     }
 
     // B7 - check all links
