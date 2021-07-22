@@ -131,38 +131,37 @@ class Application {
   }
 
   async run () {
-    await this.computeStep('log1', async () => {
-      console.log('app starting!')
-    })
+    // await this.computeStep('log1', async () => {
+    //   console.log('app starting!')
+    // })
 
     await this.openBroadcast('hello!', { hello: 'world' })
-
     const hello = await this.receiveAll('hello!')
-
-    await this.computeStep('log2', async () => {
-      console.log('app midpoint!')
-    })
-
-    await this.covertBroadcast('hidden!', { hello: 'hidden' })
-
-    const hidden = await this.receiveAll('hidden!')
-
-    await this.computeStep('log3', async () => {
-      console.log('app midpoint 2!')
-    })
-
-    await this.threePhaseBroadcast('threephase!', { hello: 'threephase' })
-
-    const threephase = await this.receiveAll('threephase!')
-
-    await this.computeStep('log4', async () => {
-      console.log('app ending!')
-    })
-
-    await this.record('hellos', hello)
-    await this.record('hiddens', hidden)
-    await this.record('threephases', threephase)
-    await this.record('inputs', this.inputs)
+    //
+    // await this.computeStep('log2', async () => {
+    //   console.log('app midpoint!')
+    // })
+    //
+    // await this.covertBroadcast('hidden!', { hello: 'hidden' })
+    //
+    // const hidden = await this.receiveAll('hidden!')
+    //
+    // await this.computeStep('log3', async () => {
+    //   console.log('app midpoint 2!')
+    // })
+    //
+    // await this.threePhaseBroadcast('threephase!', { hello: 'threephase' })
+    //
+    // const threephase = await this.receiveAll('threephase!')
+    //
+    // await this.computeStep('log4', async () => {
+    //   console.log('app ending!')
+    // })
+    //
+    // await this.record('hellos', hello)
+    // await this.record('hiddens', hidden)
+    // await this.record('threephases', threephase)
+    // await this.record('inputs', this.inputs)
   }
 }
 
