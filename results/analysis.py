@@ -260,7 +260,7 @@ def generate_plot_by_subtask(directory):
     plt.xscale("log")
     plt.yscale("log")
     # plt.xlim((2, 1024))
-    plt.ylim((1e-1, 1e8))
+    plt.ylim((1e-1, 1e6))
     plt.tick_params(
         axis='x',          # changes apply to the x-axis
         which='minor',      # both major and minor ticks are affected
