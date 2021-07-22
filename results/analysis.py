@@ -15,7 +15,6 @@ def get_data_from_directory(directory):
 all_node_counts = np.array([2**i for i in range(1, 13)])
 
 
-
 def trendline_plot(directory):
 
     data = get_data_from_directory(directory)
@@ -158,17 +157,32 @@ def generate_plot_by_subtask(directory):
 
         for size in sorted(data):
 
-            times = []
+            # times = []
 
-            for report in data[size]["reports"]:
+            # for report in data[size]["aggregates"]:
 
-                v = report["times"]["events"]
+            #     v = report["times"]["events"]
 
-                times.append(v[task]["end"]-v[task]["start"])
+            #     times.append(v[task]["end"]-v[task]["start"])
 
-            avg = sum(times)/len(times)
+            avg = data[size]["aggregates"]["times"]["events"][task]["mean"]
             values.append(avg)
         list_of_values1.append(values)
+
+    total_values = []
+
+    for size in sorted(data):
+
+        # times = []
+
+        # for report in data[size]["aggregates"]:
+
+        #     v = report["times"]["events"]
+
+        #     times.append(v[task]["end"]-v[task]["start"])
+
+        avg = data[size]["aggregates"]["times"]["total"]["mean"]
+        total_values.append(avg)
 
     # Plot
     print("Generating Plot")
@@ -188,11 +202,55 @@ def generate_plot_by_subtask(directory):
     # ax.bar(labels, [1 for l in labels], width, label="bar")
 
     # bottom = [0 for l in labels]
+    plt.plot(sorted(data), total_values, label="Total", color="blue")
 
-    for values1, task in zip(list_of_values1, task_names):
+    z = np.polyfit(np.log(sorted(data)[5:]), np.log(total_values[5:]), 1)
+
+    print(z)
+
+    p = np.poly1d(z)
+
+    # print(all_node_counts, np.exp(p(np.log(all_node_counts))))
+
+    # plt.plot(sorted(data) + [512, 1024], total_values + list(np.exp(p(np.log([512, 1024])))), alpha=0.35, color="grey")
+
+    linestyle_tuple = [
+        # ('loosely dotted',        (0, (1, 10))),
+        ('dotted',                (0, (1, 1))),
+        # ('densely dotted',        (0, (1, 1))),
+
+        ('loosely dashed',        (0, (5, 10))),
+        ('dashed',                (0, (5, 5))),
+        ('densely dashed',        (0, (5, 1))),
+
+        ('loosely dashdotted',    (0, (3, 10, 1, 10))),
+        ('dashdotted',            (0, (3, 5, 1, 5))),
+        ('densely dashdotted',    (0, (3, 1, 1, 1))),
+
+        ('dashdotdotted',         (0, (3, 5, 1, 5, 1, 5))),
+        ('loosely dashdotdotted', (0, (3, 10, 1, 10, 1, 10))),
+        ('densely dashdotdotted', (0, (3, 1, 1, 1, 1, 1)))]
+
+    colors = ["green", "purple", "blue", "red", "green", "purple", "blue", "red"]
+
+    for values1, task, (name, linestyle), color in zip(list_of_values1, task_names, linestyle_tuple, colors):
         print(task, values1, "\n")
 
-        plt.plot(sorted(data), values1, label=task)
+        task = task.replace("three", "3")
+
+        plt.plot(sorted(data), values1, label=task, linestyle=linestyle)
+
+        print("fitting")
+
+        z = np.polyfit(np.log(sorted(data)[5:]), np.log(values1[5:]), 1)
+
+        print(z)
+
+        p = np.poly1d(z)
+
+        # print(all_node_counts, np.exp(p(np.log(all_node_counts))))
+
+        # plt.plot(sorted(data) + [512, 1024], values1 + list(np.exp(p(np.log([512, 1024])))), linestyle=linestyle, alpha=0.35, color="grey")
 
         # for l in range(len(labels)):
         #     bottom[l] += values1[l]
@@ -201,16 +259,19 @@ def generate_plot_by_subtask(directory):
     plt.xlabel('Nodes')
     plt.xscale("log")
     plt.yscale("log")
+    # plt.xlim((2, 1024))
+    plt.ylim((1e-1, 1e8))
     plt.tick_params(
         axis='x',          # changes apply to the x-axis
         which='minor',      # both major and minor ticks are affected
         bottom=False,      # ticks along the bottom edge are off
         top=False,         # ticks along the top edge are off
-        labelbottom=False) # labels along the bottom edge are off
-    plt.xticks(ticks=sorted(data), labels=[str(d) for d in sorted(data)])
+        labelbottom=False)  # labels along the bottom edge are off
+    ticks = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+    plt.xticks(ticks=ticks, labels=[str(d) for d in ticks])
 
     plt.title('Times for Different Protocol Phases')
-    plt.legend()
+    plt.legend(prop={'size': 7.5}, frameon=False)
     # plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
 
     print("saving")
@@ -220,7 +281,8 @@ def generate_plot_by_subtask(directory):
     plt.savefig(f"img/{directory}/plotbysubtask.png")
 
 
-generate_plot_by_subtask("final/single-value-consensus")
+generate_plot_by_subtask("final/reconstitution")
+
 
 def generate_grouped_svc_1_vs_3_plot():
 
