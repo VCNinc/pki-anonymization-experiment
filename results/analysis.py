@@ -212,7 +212,7 @@ def generate_plot_by_subtask(directory):
 
     # print(all_node_counts, np.exp(p(np.log(all_node_counts))))
 
-    # plt.plot(sorted(data) + [512, 1024], total_values + list(np.exp(p(np.log([512, 1024])))), alpha=0.35, color="grey")
+    plt.plot(sorted(data) + [1024], total_values + list(np.exp(p(np.log([1024])))), alpha=0.35, color="grey")
 
     linestyle_tuple = [
         # ('loosely dotted',        (0, (1, 10))),
@@ -250,7 +250,7 @@ def generate_plot_by_subtask(directory):
 
         # print(all_node_counts, np.exp(p(np.log(all_node_counts))))
 
-        # plt.plot(sorted(data) + [512, 1024], values1 + list(np.exp(p(np.log([512, 1024])))), linestyle=linestyle, alpha=0.35, color="grey")
+        plt.plot(sorted(data) + [1024], values1 + list(np.exp(p(np.log([1024])))), linestyle=linestyle, alpha=0.35, color="grey")
 
         # for l in range(len(labels)):
         #     bottom[l] += values1[l]
@@ -260,7 +260,7 @@ def generate_plot_by_subtask(directory):
     plt.xscale("log")
     plt.yscale("log")
     # plt.xlim((2, 1024))
-    plt.ylim((1e-1, 1e6))
+    plt.ylim((1e-1, 1e5))
     plt.tick_params(
         axis='x',          # changes apply to the x-axis
         which='minor',      # both major and minor ticks are affected
@@ -281,7 +281,7 @@ def generate_plot_by_subtask(directory):
     plt.savefig(f"img/{directory}/plotbysubtask.png")
 
 
-generate_plot_by_subtask("final/reconstitution")
+generate_plot_by_subtask("final/single-chat-room-pkia")
 
 
 def generate_grouped_svc_1_vs_3_plot():
