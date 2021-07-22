@@ -73,6 +73,100 @@ def trendline_plot(directory):
 
 # quit()
 
+def generate_stacked_bar_for_reconstitution_vs_pki():
+    # Plot
+    print("Generating Plot")
+
+    labels = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+    print(labels)
+
+    width = 0.35
+
+    fig, ax = plt.subplots()
+
+    reconstitution = [
+        154.2332,
+        219.7325,
+        353.5959,
+        574.8694,
+        1000.0928,
+        1866.0320,
+        3503.8608,
+        6764.8890,
+        14573.4864,
+        37091.1583
+    ]
+    svc = [22.09,
+           81.38,
+           211.22,
+           751.28,
+           2867.45,
+           11264.52,
+           43010.96,
+           173960.76,
+           677100.14,
+           2660860.88
+           ]
+
+    total = [a + b for a, b in zip(svc, reconstitution)]
+    print(total)
+
+    # ax.bar([str(l) for l in labels], svc, width, label="Single Value Consensus")
+
+    # ax.bar([str(l) for l in labels], reconstitution, width, bottom=svc, label="Reconstitution")
+    # print(list_of_values1)
+
+    # # ax.bar(labels, [1 for l in labels], width, label="foo")
+
+    # # ax.bar(labels, [1 for l in labels], width, label="bar")
+
+    # # bottom = [0 for l in labels]
+
+    # for values1, task in zip(list_of_values1, task_names):
+    #     print(task, values1, "\n")
+
+    #     ax.bar(labels, values1, width, label=task)
+
+    #     # for l in range(len(labels)):
+    #     bottom[l] += values1[l]
+
+    dim = 3
+
+    w = 0.90
+    dimw = w / dim
+
+    fig, ax = plt.subplots()
+
+    x = np.arange(len(svc))
+    b = ax.bar(x + 0 * dimw, reconstitution, dimw, bottom=0.001, label="Reconstitution", hatch="\\\\")
+    b = ax.bar(x + 1 * dimw, svc, dimw, bottom=0.001, label="Consensus", hatch="oo")
+    c = ax.bar(x + 2 * dimw, total, dimw, bottom=0.001, label="Total", hatch="XX")
+
+    ax.set_xticks(x + dimw / 2)
+    ax.set_xticklabels(map(str, 2**(x+1)))
+
+    ax.set_xlabel('Number of nodes')
+    # ax.set_ylabel('y')
+
+    ax.set_ylabel('Time')
+    ax.set(yscale="log")
+    ax.set(ylim=(10, 5e6))
+
+    ax.set_title('Times for Reconstitution vs Consensus')
+    ax.legend()
+    # plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+    print("saving")
+
+    # os.makedirs(f"./img/{directory}", exist_ok=True)
+
+    plt.savefig(f"img/stacked_bar_for_reconstitution_vs_pki.png")
+
+
+generate_stacked_bar_for_reconstitution_vs_pki()
+quit()
+
 
 def generate_stacked_bar_plot(directory):
 
