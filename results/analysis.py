@@ -15,6 +15,7 @@ def get_data_from_directory(directory):
 all_node_counts = np.array([2**i for i in range(1, 13)])
 
 
+
 def trendline_plot(directory):
 
     data = get_data_from_directory(directory)
@@ -35,19 +36,21 @@ def trendline_plot(directory):
 
     print("fitting")
 
-    z = np.polyfit(np.log(node_counts), np.log(avg_times), 1)
+    z = np.polyfit(np.log(node_counts[5:]), np.log(avg_times[5:]), 1)
 
     print(z)
 
     p = np.poly1d(z)
 
-    print(node_counts, all_node_counts)
+    print(all_node_counts, np.exp(p(np.log(all_node_counts))))
 
     plt.plot(all_node_counts, np.exp(p(np.log(all_node_counts))), "r--", label="Power Law Fit")
 
     z = np.polyfit(node_counts, avg_times, 2)
 
     print(z)
+
+    # print(all_node_counts, p(all_node_counts))
 
     p = np.poly1d(z)
     plt.plot(all_node_counts, p(all_node_counts), "g--", label="Quadratic Fit")
@@ -66,10 +69,10 @@ def trendline_plot(directory):
 # trendline_plot("benchmarks/svc-link-optimize-comparison/svc-optimized")
 # trendline_plot("benchmarks/svc-link-optimize-comparison/svc-unoptimized")
 # trendline_plot("remote/single-value-consensus")
-trendline_plot("final/single-value-consensus")
+# trendline_plot("final/single-chat-room-trs")
 
 
-quit()
+# quit()
 
 
 def generate_stacked_bar_plot(directory):
@@ -140,8 +143,84 @@ def generate_stacked_bar_plot(directory):
 
 # generate_stacked_bar_plot("final/single-value-consensus")
 
-quit()
+# quit()
 
+def generate_plot_by_subtask(directory):
+
+    data = get_data_from_directory(directory)
+
+    task_names = data[2]["reports"][0]["times"]["events"]
+
+    list_of_values1 = []
+
+    for task in task_names:
+        values = []
+
+        for size in sorted(data):
+
+            times = []
+
+            for report in data[size]["reports"]:
+
+                v = report["times"]["events"]
+
+                times.append(v[task]["end"]-v[task]["start"])
+
+            avg = sum(times)/len(times)
+            values.append(avg)
+        list_of_values1.append(values)
+
+    # Plot
+    print("Generating Plot")
+
+    # labels = [str(d) for d in sorted(data)]
+
+    # print(labels)
+
+    # width = 0.35
+
+    # fig, ax = plt.subplots()
+
+    print(list_of_values1)
+
+    # ax.bar(labels, [1 for l in labels], width, label="foo")
+
+    # ax.bar(labels, [1 for l in labels], width, label="bar")
+
+    # bottom = [0 for l in labels]
+
+    for values1, task in zip(list_of_values1, task_names):
+        print(task, values1, "\n")
+
+        plt.plot(sorted(data), values1, label=task)
+
+        # for l in range(len(labels)):
+        #     bottom[l] += values1[l]
+
+    plt.ylabel('Avg time (ms)')
+    plt.xlabel('Nodes')
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='minor',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=False) # labels along the bottom edge are off
+    plt.xticks(ticks=sorted(data), labels=[str(d) for d in sorted(data)])
+
+    plt.title('Times for Different Protocol Phases')
+    plt.legend()
+    # plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
+
+    print("saving")
+
+    os.makedirs(f"./img/{directory}", exist_ok=True)
+
+    plt.savefig(f"img/{directory}/plotbysubtask.png")
+
+
+generate_plot_by_subtask("final/single-value-consensus")
 
 def generate_grouped_svc_1_vs_3_plot():
 
