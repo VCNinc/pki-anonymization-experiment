@@ -1,8 +1,8 @@
 const axios = require('axios')
 const fs = require('fs')
 
-const core = 'http://13.58.18.69:3000/'  // remote
-// const core = 'http://localhost:3000/' // local
+// const core = 'http://13.58.18.69:3000/'  // remote
+const core = 'http://localhost:3000/' // local
 
 function connect () {
   console.log('waiting for server...')
@@ -80,6 +80,6 @@ async function run (name, total, target = 32, save = false) {
 }
 
 (async () => {
-  await run('single-value-consensus', 256, 32, true)
-  await run('single-value-consensus', 512, 32, true)
+  await run('benchmark', 64, 8, true)
+  // await run('single-value-consensus', 512, 32, true)
 })()
