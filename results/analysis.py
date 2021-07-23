@@ -139,9 +139,13 @@ def generate_stacked_bar_for_reconstitution_vs_pki():
     fig, ax = plt.subplots()
 
     x = np.arange(len(svc))
-    b = ax.bar(x + 0 * dimw, reconstitution, dimw, bottom=0.001, label="Reconstitution", hatch="\\\\")
-    b = ax.bar(x + 1 * dimw, svc, dimw, bottom=0.001, label="Consensus", hatch="oo")
-    c = ax.bar(x + 2 * dimw, total, dimw, bottom=0.001, label="Total", hatch="XX")
+
+    b = ax.bar(x + 0 * dimw, reconstitution, dimw, bottom=0.001, label="Reconstitution", hatch="--")
+    b = ax.bar(x[:-2] + 1 * dimw, svc[:-2], dimw, bottom=0.001, label="Consensus", hatch="..")
+    c = ax.bar(x[:-2] + 2 * dimw, total[:-2], dimw, bottom=0.001, label="Total", hatch="--..")
+
+    b = ax.bar(x[-2:] + 1 * dimw, svc[-2:], dimw, bottom=0.001, hatch="..", alpha=0.25, color="orange")
+    c = ax.bar(x[-2:] + 2 * dimw, total[-2:], dimw, bottom=0.001, hatch="--..", alpha=0.25, color="green")
 
     ax.set_xticks(x + dimw / 2)
     ax.set_xticklabels(map(str, 2**(x+1)))
