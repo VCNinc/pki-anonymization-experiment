@@ -73,6 +73,84 @@ def trendline_plot(directory):
 
 # quit()
 
+def generate_relative_line_graph():
+
+    pki = [27.6972,
+           40.7735,
+           67.9981,
+           124.1699,
+           288.6472,
+           573.0114,
+           1691.8669,
+           3390.8669,
+           8994.3155,
+           21879.7245]
+
+    trs = [19.3811,
+           70.9798,
+           209.9128,
+           760.3889,
+           2777.6539,
+           10832.1787,
+           43032.0684,
+           173284.0372,
+           691509.6970,
+           2765792.8300
+           ]
+
+    linestyle_tuple = [
+        # ('loosely dotted',        (0, (1, 10))),
+        ('dotted',                (0, (1, 1))),
+        # ('densely dotted',        (0, (1, 1))),
+
+        ('loosely dashed',        (0, (5, 10))),
+        ('dashed',                (0, (5, 5))),
+        ('densely dashed',        (0, (5, 1))),
+
+        ('loosely dashdotted',    (0, (3, 10, 1, 10))),
+        ('dashdotted',            (0, (3, 5, 1, 5))),
+        ('densely dashdotted',    (0, (3, 1, 1, 1))),
+
+        ('dashdotdotted',         (0, (3, 5, 1, 5, 1, 5))),
+        ('loosely dashdotdotted', (0, (3, 10, 1, 10, 1, 10))),
+        ('densely dashdotdotted', (0, (3, 1, 1, 1, 1, 1)))]
+
+    plt.plot([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024], pki, color="grey", linestyle="dotted", alpha=0.35)
+    plt.plot([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024], trs, color="grey", linestyle="dashed", alpha=0.35)
+
+    plt.plot([2, 4, 8, 16, 32, 64, 128, 256, 512], pki[:-1], label="PKI", linestyle="dotted")
+    plt.plot([2, 4, 8, 16, 32, 64, 128, 256], trs[:-2], label="TRS", linestyle="dashed")
+
+    plt.xlabel('# of Nodes')
+    plt.ylabel('Avg time to completion (ms)')
+
+    # plt.xlim([2, 4096])
+
+    plt.xscale('log')
+    plt.yscale('log')
+
+    plt.legend()
+
+    plt.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='minor',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=False)  # labels along the bottom edge are off
+    ticks = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+    plt.xticks(ticks=ticks, labels=[str(d) for d in ticks])
+
+    print("saving")
+
+    # os.makedirs(f"./img/{directory}", exist_ok=True)
+
+    plt.savefig(f"img/relative_line_graph.png")
+
+
+generate_relative_line_graph()
+quit()
+
+
 def generate_stacked_bar_for_reconstitution_vs_pki():
     # Plot
     print("Generating Plot")
